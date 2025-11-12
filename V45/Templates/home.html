@@ -1,9 +1,28 @@
-{% extends 'base.html' %}
-{% block content %}
-    <h2>Startsida: logga in</h2>
-    <form method="post">
-        Username: <input type="text" name="name" value=""><br>
-        Password: <input type="password" name="password" value="">
-        <input type="submit" value="Login">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FFF - Forum För Fårskallar</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Inputformulär -->
+    <form method="post" action="/">  <!-- ← Ändra action till "/" -->
+        <table>
+            <tr>
+                <td>Användarnamn:</td>
+                <td><input type="text" name="name"/></td>  <!-- ← name="name" -->
+            </tr>
+            <tr>
+                <td>Lösenord:</td>
+                <td><input type="password" name="password"/></td>  <!-- ← name="password" -->
+            </tr>
+        </table>
+        <p><input type="submit" value="Logga in"/></p>
     </form>
-{% endblock %}
+    
+    <form action="/logout">
+        <input type="submit" value="Logga ut" />
+    </form>
+    <hr />
+</body>
+</html>

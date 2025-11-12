@@ -9,8 +9,8 @@ def get_connection(host="localhost", user="root", password=""):
     mydb = mysql.connector.connect(
         host=host,
         user=user,
-        password=password,
-        database="webbserverprogrammering"  # byt namn om din databas heter något annat
+        password=password, #Bytnamn på allt som har namnet database vår server fick namnet webbserverprogrammering.
+        database="formenförfår"  # byt namn om din databas heter något annat
     )
     return mydb
 
@@ -26,7 +26,7 @@ def index():
         for user in users:
             
             # varje user i loopen är en 4-tippel på formen (username, password, email, id)
-            if request.form['name'] == user[0] and request.form['password'] == user[1]:
+            if request.form['name'] == user[1] and request.form['password'] == user[2]:
                 # i själva verket bör inte lösenord lagras i klartext utan vara krypterade - mer om detta senare i kursen
                 logged_in = True
                 session['user'] = {'username': user[0], 'email': user[2]}
