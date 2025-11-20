@@ -1,3 +1,4 @@
+import datetime
 from flask import Flask, render_template, session, redirect, url_for, request
 import mysql.connector  
 
@@ -5,14 +6,17 @@ app = Flask(__name__)
 app.secret_key = 'hemligtextsträngsomingenkangissa'  # Används för sessionshantering
 
 # skapa databasuppkoppling
-def get_connection(host="localhost", user="root", password=""): 
+def get_connection(host="localhost", user="root", password="", database="formenförfår"): 
     mydb = mysql.connector.connect(
         host=host,
         user=user,
         password=password, #Bytnamn på allt som har namnet database vår server fick namnet webbserverprogrammering.
-        database="formenförfår"  # byt namn om din databas heter något annat
+        database=database  # byt namn om din databas heter något annat
     )
     return mydb
+
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -26,11 +30,12 @@ def index():
         for user in users:
             
             # varje user i loopen är en 4-tippel på formen (username, password, email, id)
-            if request.form['name'] == user[0] and request.form['password'] == user[1]:
+            if request.form['name'] == user[1] and request.form['password'] == user[2]:
+              session['user'] = {'username': user[1], 'email': 'ingen@email.se'}
                 # i själva verket bör inte lösenord lagras i klartext utan vara krypterade - mer om detta senare i kursen
-                logged_in = True
-                session['user'] = {'username': user[0], 'email': user[2]}
-                break
+              logged_in = True
+              session['user'] = {'username': user[1], 'email': user[2]}
+              break
         if not logged_in: # om hela loopen har gått utan att någon matchning hittats
             session.clear()
         return redirect(url_for('login'))
@@ -38,20 +43,17 @@ def index():
     # Det här returneras om GET-anrop görs
     return render_template('home.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'user' in session:
-      return render_template('login.html', user=session['user'])
+      db = get_connection(database="webbserverprogrammering")
+      mycursor = db.cursor()
+      mycursor.execute("SELECT * FROM posts")
+      posts = mycursor.fetchall()
+      return render_template('login.html', user=session['user'], posts=posts)
     else:
       return render_template('error.html')
 
-
-@app.route('/annansida')
-def annansida():
-    if session:
-        return render_template('annansida.html', user=session['user'])
-    else:
-        return render_template('error.html')
 
 @app.route('/logout')
 def logout():
@@ -62,10 +64,18 @@ def logout():
 def append():
     if not session: # om man inte är inloggad
         return render_template('error.html')
-    line = f"{session['user']['username']} skrev: {request.form.get('line', '')}"
-    with open('meddelanden.txt', 'a', encoding='utf-8') as f:
-        f.write(line + '\n')
-    return redirect('/annansida')
+
+    author = session['user']['username']
+    text = request.form.get('line', '')
+    now = datetime.datetime.now()
+    db = get_connection(database='webbserverprogrammering')
+    mycursor = db.cursor()
+    sql = "INSERT INTO posts (author, text, time) VALUES (%s, %s, %s)"
+    val = (author, text, now)
+    mycursor.execute(sql, val)
+    db.commit()
+
+    return redirect('/login')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

@@ -1,9 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h2>Startsida: logga in</h2>
-    <form method="post">
-        Username: <input type="text" name="name" value=""><br>
-        Password: <input type="password" name="password" value="">
-        <input type="submit" value="Login">
-    </form>
+    <h2>Välkommen</h2>
+    <p>Du är inloggad som {{user.username}}.</p>
+    <h2>Skriv något inlägg</h2>
+    <form method="post" action="/append">
+                <textarea id="text" name="line" rows="4" cols="50" placeholder="Skriv något"></textarea>
+                <input type="submit" value="Spara">
+            </form>
+    <h2>Tidigare inlägg</h2>
+        <table>
+        <tr>
+            <th>id</th>
+            <th>Författare</th>
+            <th>Meddelande</th>
+            <th>Tid</th>
+        </tr>
+{% for post in posts %}
+        <tr>
+            <!-- i tur och ordning: id, author, text, time -->
+            <td>{{ post[0] }}</td>
+            <td>{{ post[1] }}</td>
+            <td>{{ post[2] }}</td>
+            <td>{{ post[3] }}</td>
+        </tr>
+{% endfor %}
+    </table>
+
 {% endblock %}
